@@ -1,3 +1,5 @@
+[![Build Status](https://secure.travis-ci.org/claerhout/testrail.png?branch=master)](http://travis-ci.org/claerhout/testrail)
+
 Usage
 -----
 
