@@ -99,6 +99,7 @@ const char* strres(enum tr_res r) {
 		case TR_PASSED: return "[passed]";
 		case TR_FAILED: return "<FAILED>";
 	}
+	fail("unknown result %u", r);
 }
 
 enum tr_res max(enum tr_res cur, enum tr_res new) { return cur > new? cur: new; }
