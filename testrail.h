@@ -28,14 +28,15 @@ enum tr_ex {
 	TR_INT,
 	TR_SEGV,
 	TR_TERM,
+	TR_OTHER,
 };
 
 struct tr_test {
-	void* (*setup)(void);
 	_Bool (*assert)(void*);
 	void (*cleanup)(void*);
-	struct tr_test *body; /* sublist head node */
-	struct tr_test *next; /* next node */
+	void* (*setup)(void);
+	struct tr_test *body;
+	struct tr_test *next;
 	enum tr_mode mode; /* specify a mode for this test node and its body */
 	enum tr_ex expect; /* specify an exception which assert() should raise */
 	const char *name;
