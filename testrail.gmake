@@ -7,7 +7,7 @@ TESTS := $(patsubst %.c, %, $(wildcard test/*))
 all: $(TESTS)
 
 testrail-test.h: testrail.h
-	touch $@
+	touch -c $@
 
 testrail.o: testrail.c testrail-test.h
 
