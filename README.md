@@ -9,7 +9,7 @@ Usage
 
 * Pull testrail.git to your project directory.
 * Place your tests in the **test/** directory.
-* Adjust **testrail.gmake** to specify the dependencies of your project.
+* Adjust **testrail.gmake** (CFLAGS variable and %.o rule).
 * Run the makefile: **make -f testrail.gmake**, all the tests will be compiled and run.
 
 Test Development
