@@ -1,5 +1,8 @@
-#ifndef TESTRAILDEV
-#define TESTRAILDEV
+/* Testrail internal interfaces for self-testing.
+ */
+
+#ifndef TESTRAIL_TEST
+#define TESTRAIL_TEST
 
 #include <setjmp.h>
 #include <stdio.h>
@@ -16,13 +19,15 @@ enum tr_res { /* WARNING: symbols are sorted by precedence, needed by max() */
 struct tr_ctx {
 	unsigned cnt[TR_FAILED + 1];
 	void (*handler)(int);
+	enum tr_ex *caught;
 	enum tr_res res;
-	enum tr_ex *ex;
 	unsigned sum;
 	jmp_buf *env;
 	FILE *file;
 };
 
+enum tr_ex sigtoex(int);
+
 struct tr_ctx run(FILE*, enum tr_ex*, jmp_buf*, void(*)(int), struct tr_test*) __attribute__(( nonnull(1, 2, 3, 4, 5) ));
 
-#endif /* TESTRAILDEV */
+#endif /* TESTRAIL_TEST */

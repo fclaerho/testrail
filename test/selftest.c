@@ -1,4 +1,4 @@
-#include "testrail-dev.h"
+#include "testrail-test.h"
 #include <signal.h>
 
 /* Tested tests.
@@ -32,19 +32,19 @@ TR_HEAD(passed_and_passed, .body = &passed_test4)
 
 TR_HEAD(failed_and_passed, .body = &failed_test5)
 
-TR_TEST(expected_abrt, .caught = TR_ABRT) { raise(SIGABRT); return 0; }
+TR_TEST(expected_abrt, .expected = TR_ABRT) { raise(SIGABRT); return 0; }
 
 TR_TEST(unexpected_abrt) { raise(SIGABRT); return 0; }
 
-TR_TEST(expected_fpe, .caught = TR_FPE) { raise(SIGFPE); return 0; }
+TR_TEST(expected_fpe, .expected = TR_FPE) { raise(SIGFPE); return 0; }
 
 TR_TEST(unexpected_fpe) { raise(SIGFPE); return 0; }
 
-TR_TEST(expected_ill, .caught = TR_ILL) { raise(SIGILL); return 0; }
+TR_TEST(expected_ill, .expected = TR_ILL) { raise(SIGILL); return 0; }
 
 TR_TEST(unexpected_ill) { raise(SIGILL); return 0; }
 
-TR_TEST(expected_segv, .caught = TR_SEGV) { raise(SIGSEGV); return 0; }
+TR_TEST(expected_segv, .expected = TR_SEGV) { raise(SIGSEGV); return 0; }
 
 TR_TEST(unexpected_segv) { raise(SIGSEGV); return 0; }
 
@@ -60,7 +60,7 @@ __attribute__(( constructor )) void setup(void) { g_file = fopen("/dev/null", "w
 __attribute__(( destructor )) void cleanup(void) { fclose(g_file); }
 
 static void undo(int sig) {
-	g_ex = TR_SEGV; /* FIXME */
+	g_ex = sigtoex(sig);
 	longjmp(g_env, 0);
 }
 
@@ -95,7 +95,15 @@ static void undo(int sig) {
 
 	TR_HEAD(list, .story = "check list result", .body = &failed_and_passed_is_failed, .next = &basics)
 
-		TR_TEST(expected_segv_is_passed) {
+		TR_TEST(expected_abrt_is_passed) {
+			return run(g_file, &g_ex, &g_env, undo, &expected_abrt).res == TR_PASSED;
+		}
+
+		TR_TEST(unexpected_abrt_is_failed, .next = &expected_abrt_is_passed) {
+			return run(g_file, &g_ex, &g_env, undo, &unexpected_abrt).res == TR_FAILED;
+		}
+
+		TR_TEST(expected_segv_is_passed, .next = &unexpected_abrt_is_failed) {
 			return run(g_file, &g_ex, &g_env, undo, &expected_segv).res == TR_PASSED;
 		}
 
@@ -105,4 +113,4 @@ static void undo(int sig) {
 
 	TR_HEAD(signals, .story = "check signal handling", .body = &unexpected_segv_is_failed, .next = &list)
 
-TR_G_HEAD(.story = "check testrail", .body = &signals)
+TR_MAIN_HEAD(.story = "check testrail", .body = &signals)

@@ -7,9 +7,9 @@ tests := $(patsubst %.c, %, $(wildcard test/*))
 
 all: $(tests)
 
-testrail.o: testrail.c testrail-dev.h
+testrail.o: testrail.c testrail-test.h
 
-selftest.o: selftest.c testrail-dev.h
+selftest.o: selftest.c testrail-test.h
 
 %.o: %.c testrail.h
 
