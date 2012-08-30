@@ -7,8 +7,8 @@
  *
  * A test suite is a list of test nodes (hereafter referred to as "a list").
  * A test node can be itself divided into a list, called its "body".
- * The result of a list is the merging of the results of its nodes.
- * The result of a node is the merging of:
+ * The result of a list is the aggregation of the results of its nodes.
+ * The result of a node is the aggregation of:
  * - the result of its assert() callback, if no exception is raised,
  * - the catching of an exception specified by its .expected field,
  * - the result of its body.
