@@ -76,11 +76,11 @@ static _Bool trapsig(void(*handler)(int)) {
 
 static const char* strres(enum tr_res r) {
 	switch(r) {
-		case TR_UNKNOWN: return "<UNKNOWN>";
-		case TR_IGNORED: return "[ignored]";
-		case TR_PASSED: return "[passed]";
-		case TR_FAILED: return "<FAILED>";
-		default: return "<OTHER?>";
+		case TR_UNKNOWN: return "*UNKNOWN*";
+		case TR_IGNORED: return "ignored";
+		case TR_PASSED: return "passed";
+		case TR_FAILED: return "*FAILED*";
+		default: return "result?";
 	}
 }
 
@@ -101,31 +101,34 @@ static const char* prefix(tr_depth d, _Bool new) {
 	return strcat(s, new? "+- ": "|  ");
 }
 
+double elapsed(clock_t t0) { return ((double)clock() - t0) / CLOCKS_PER_SEC; }
+
 static enum tr_res runtest(struct tr_ctx *ctx, struct tr_test *t, tr_depth d, enum tr_mode m) {
 	if(t->mode != TR_INHERITED) m = t->mode;
 	enum tr_res r = TR_UNKNOWN;
 	trace(ctx->file, "%s%s", prefix(d, 1), t->story);
+	clock_t t0 = clock();
 	if(t->ignored) {
 		r = TR_IGNORED;
 	} else {
+		void *data = 0;
+		if(t->setup) data = t->setup();
 		if(trapsig(ctx->handler)) {
-			void *usrp = 0;
-			if(t->setup) usrp = t->setup();
 			if(!setjmp(*(ctx->env))) {
-				if(t->assert) r = t->assert(usrp)? TR_PASSED: TR_FAILED;
+				if(t->assert) r = t->assert(data)? TR_PASSED: TR_FAILED;
 			} else {
 				_Bool b = t->expected == *(ctx->caught);
 				trace(ctx->file, "%scaught %sexpected exception (%u, %s)", prefix(d, 0), b? "": "un", *(ctx->caught), g_exdesc[*(ctx->caught)].s);
 				r = b? TR_PASSED: TR_FAILED;
 			}
-			if(t->cleanup) t->cleanup(usrp);
 		} else {
 			trace(ctx->file, "%scannot trap signals", prefix(d + 1, 0));
 			r = TR_FAILED;
 		}
 		if(t->body && !stop(m, r)) r = max(r, runlist(ctx, t->body, d + 1, m));
+		if(t->cleanup) t->cleanup(data);
 	}
-	trace(ctx->file, "%s%s", prefix(d, 0), strres(r));
+	trace(ctx->file, "%stest %s in %fs", prefix(d, 0), strres(r), elapsed(t0));
 	ctx->cnt[r] += 1;
 	ctx->sum += 1;
 	return r;
@@ -138,6 +141,7 @@ static enum tr_res runlist(struct tr_ctx *ctx, struct tr_test *head, tr_depth d,
 }
 
 struct tr_ctx run(FILE *file, enum tr_ex *caught, jmp_buf *env, void (*handler)(int), struct tr_test *head) {
+	clock_t t0 = clock();
 	struct tr_ctx ctx = {
 		.handler = handler,
 		.caught = caught,
@@ -145,8 +149,10 @@ struct tr_ctx run(FILE *file, enum tr_ex *caught, jmp_buf *env, void (*handler)(
 		.env = env,
 	};
 	ctx.res = runlist(&ctx, head, 0, TR_RESUME_ON_FAILURE);
-	trace(file, "summary: %u node(s), %u unknown, %u ignored, %u passed, %u failed, %s.",
+	trace(file, "summary: %fs, %u node%s, %u unknown, %u ignored, %u passed, %u failed, %s.",
+		elapsed(t0),
 		ctx.sum,
+		ctx.sum > 1? "s": "",
 		ctx.cnt[TR_UNKNOWN],
 		ctx.cnt[TR_IGNORED],
 		ctx.cnt[TR_PASSED],

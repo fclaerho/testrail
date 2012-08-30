@@ -20,7 +20,7 @@
 #define TESTRAIL
 
 enum tr_mode {
-	TR_INHERITED = 0, /* inherit parent mode */
+	TR_INHERITED = 0,
 	TR_STOP_ON_FAILURE,
 	TR_RESUME_ON_FAILURE, /* run all tests (default) */
 };
@@ -56,7 +56,7 @@ extern struct tr_test tr_g_head;
 		.story = #symbol,\
 		__VA_ARGS__\
 	};\
-	_Bool assert_##symbol(__attribute__(( unused )) void *datap)
+	_Bool assert_##symbol(__attribute__(( unused )) void *data)
 
 #define TR_HEAD(symbol, ...) struct tr_test symbol = { __VA_ARGS__ };
 
