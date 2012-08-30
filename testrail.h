@@ -23,26 +23,38 @@ enum tr_mode {
 
 enum tr_ex {
 	TR_ABRT,
-	TR_FP,
+	TR_FPE,
 	TR_ILL,
 	TR_INT,
 	TR_SEGV,
 	TR_TERM,
-	TR_OTHER,
 };
 
 struct tr_test {
-	_Bool (*assert)(void*);
-	void (*cleanup)(void*);
-	void* (*setup)(void);
+	_Bool (*expect)(void);
+	void (*cleanup)(void);
+	void (*setup)(void);
 	struct tr_test *body;
 	struct tr_test *next;
+	const char *story;
 	enum tr_mode mode; /* specify a mode for this test node and its body */
-	enum tr_ex expect; /* specify an exception which assert() should raise */
-	const char *name;
+	enum tr_ex caught; /* specify an exception which assert() should raise */
 	_Bool ignored; /* if set, specify to ignore this test and its body */
 };
 
-extern struct tr_test tr_g_head; /* user-defined head node */
+extern struct tr_test tr_g_head;
+
+#define TR_TEST(symbol, ...)\
+	_Bool expect_##symbol(void);\
+	struct tr_test symbol = {\
+		.expect = expect_##symbol,\
+		.story = #symbol,\
+		__VA_ARGS__\
+	};\
+	_Bool expect_##symbol(void)
+
+#define TR_HEAD(symbol, ...) struct tr_test symbol = { __VA_ARGS__ };
+
+#define TR_G_HEAD(...) TR_HEAD(tr_g_head, __VA_ARGS__)
 
 #endif /* TESTRAIL */
