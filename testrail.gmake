@@ -1,8 +1,9 @@
 .PHONY: cleanup all
 
-CFLAGS := -std=c99 -Wall -Werror -I. # NOTE: -O3 fails tests
-VPATH := .:test
+HOME := ./ # may be overriden, e.g. make -f testrail.gmake HOME=some/path/to/testrail
 TESTS := $(patsubst %.c, %, $(wildcard test/*))
+VPATH := $(HOME):test
+CFLAGS := -std=c99 -Wall -Werror -I$(HOME) # NOTE: -O3 fails tests
 
 all: $(TESTS)
 
