@@ -1,7 +1,7 @@
 #include "testrail-test.h"
 #include <signal.h>
 
-/* Tested tests.
+/* Sandboxed tests.
  */
 
 TR_TEST(failed_test) { return 0; }
@@ -88,131 +88,89 @@ TR_TEST(expected_sigterm, .expected = TR_TERM) { raise(SIGTERM); return 0; }
 
 TR_TEST(unexpected_sigterm) { raise(SIGTERM); return 0; }
 
-/* Env.
+/* Sandbox environment.
  */
 
-enum tr_ex g_caught;
-jmp_buf g_env;
-FILE *g_file;
+enum tr_ex my_caught;
+jmp_buf my_env;
+FILE *my_file;
 
-void* setup(void) {
-	g_file = tmpfile();
+void* my_setup(void) {
+	my_file = tmpfile();
 	return 0;
 }
 
-void cleanup(__attribute__(( unused )) void *p) {
-	(void)fclose(g_file);
-	g_file = 0;
+void my_cleanup(__attribute__(( unused )) void *p) {
+	(void)fclose(my_file);
+	my_file = 0;
 }
 
-static void catch(int sig) {
-	g_caught = sigtoex(sig);
-	longjmp(g_env, 0);
+static void my_catch(int sig) {
+	my_caught = sigtoex(sig);
+	longjmp(my_env, 0);
 }
 
-/* Tests.
+static _Bool is_ignored(struct tr_test *t) { return run(my_file, &my_caught, &my_env, my_catch, t).res == TR_IGNORED; }
+
+static _Bool is_passed(struct tr_test *t) { return run(my_file, &my_caught, &my_env, my_catch, t).res == TR_PASSED; }
+
+static _Bool is_failed(struct tr_test *t) { return run(my_file, &my_caught, &my_env, my_catch, t).res == TR_FAILED; }
+
+/* Testrail tests.
  */
 
-		TR_TEST(failed_test_is_failed) {
-			return run(g_file, &g_caught, &g_env, catch, &failed_test).res == TR_FAILED;
-		}
+		TR_TEST(failed_test_is_failed) { return is_failed(&failed_test); }
 
-		TR_TEST(passed_test_is_passed, .next = &failed_test_is_failed) {
-			return run(g_file, &g_caught, &g_env, catch, &passed_test).res == TR_PASSED;
-		}
+		TR_TEST(passed_test_is_passed, .next = &failed_test_is_failed) { return is_passed(&passed_test); }
 
-		TR_TEST(ignored_test_is_ignored, .next = &passed_test_is_passed) {
-			return run(g_file, &g_caught, &g_env, catch, &ignored_test).res == TR_IGNORED;
-		}
+		TR_TEST(ignored_test_is_ignored, .next = &passed_test_is_passed) { return is_ignored(&ignored_test); }
 
 	TR_HEAD(basics, .story = "check basic status", .body = &ignored_test_is_ignored)
 
-		TR_TEST(failed_and_failed_is_failed) {
-			return run(g_file, &g_caught, &g_env, catch, &failed_and_failed).res == TR_FAILED;
-		}
+		TR_TEST(failed_and_failed_is_failed) { return is_failed(&failed_and_failed); }
 
-		TR_TEST(failed_and_passed_is_failed, .next = &failed_and_failed_is_failed) {
-			return run(g_file, &g_caught, &g_env, catch, &failed_and_passed).res == TR_FAILED;
-		}
+		TR_TEST(failed_and_passed_is_failed, .next = &failed_and_failed_is_failed) { return is_failed(&failed_and_passed); }
 
-		TR_TEST(failed_and_ignored_is_failed, .next = &failed_and_passed_is_failed) {
-			return run(g_file, &g_caught, &g_env, catch, &failed_and_ignored).res == TR_FAILED;
-		}
+		TR_TEST(failed_and_ignored_is_failed, .next = &failed_and_passed_is_failed) { return is_failed(&failed_and_ignored); }
 
-		TR_TEST(passed_and_failed_is_failed, .next = &failed_and_ignored_is_failed) {
-			return run(g_file, &g_caught, &g_env, catch, &passed_and_failed).res == TR_FAILED;
-		}
+		TR_TEST(passed_and_failed_is_failed, .next = &failed_and_ignored_is_failed) { return is_failed(&passed_and_failed); }
 
-		TR_TEST(passed_and_passed_is_passed, .next = &passed_and_failed_is_failed) {
-			return run(g_file, &g_caught, &g_env, catch, &passed_and_passed).res == TR_PASSED;
-		}
+		TR_TEST(passed_and_passed_is_passed, .next = &passed_and_failed_is_failed) { return is_passed(&passed_and_passed); }
 
-		TR_TEST(passed_and_ignored_is_passed, .next = &passed_and_passed_is_passed) {
-			return run(g_file, &g_caught, &g_env, catch, &passed_and_ignored).res == TR_PASSED;
-		}
+		TR_TEST(passed_and_ignored_is_passed, .next = &passed_and_passed_is_passed) { return is_passed(&passed_and_ignored); }
 
-		TR_TEST(ignored_and_failed_is_failed, .next = &passed_and_ignored_is_passed) {
-			return run(g_file, &g_caught, &g_env, catch, &ignored_and_failed).res == TR_FAILED;
-		}
+		TR_TEST(ignored_and_failed_is_failed, .next = &passed_and_ignored_is_passed) { return is_failed(&ignored_and_failed); }
 
-		TR_TEST(ignored_and_passed_is_passed, .next = &ignored_and_failed_is_failed) {
-			return run(g_file, &g_caught, &g_env, catch, &ignored_and_passed).res == TR_PASSED;
-		}
+		TR_TEST(ignored_and_passed_is_passed, .next = &ignored_and_failed_is_failed) { return is_passed(&ignored_and_passed); }
 
-		TR_TEST(ignored_and_ignored_is_ignored, .next = &ignored_and_passed_is_passed) {
-			return run(g_file, &g_caught, &g_env, catch, &ignored_and_ignored).res == TR_IGNORED;
-		}
+		TR_TEST(ignored_and_ignored_is_ignored, .next = &ignored_and_passed_is_passed) { return is_ignored(&ignored_and_ignored); }
 
 	TR_HEAD(list, .story = "check aggregation of results", .body = &ignored_and_ignored_is_ignored, .next = &basics)
 
-		TR_TEST(expected_sigabrt_is_passed) {
-			return run(g_file, &g_caught, &g_env, catch, &expected_sigabrt).res == TR_PASSED;
-		}
+		TR_TEST(expected_sigabrt_is_passed) { return is_passed(&expected_sigabrt); }
 
-		TR_TEST(unexpected_sigabrt_is_failed, .next = &expected_sigabrt_is_passed) {
-			return run(g_file, &g_caught, &g_env, catch, &unexpected_sigabrt).res == TR_FAILED;
-		}
+		TR_TEST(unexpected_sigabrt_is_failed, .next = &expected_sigabrt_is_passed) { return is_failed(&unexpected_sigabrt); }
 
-		TR_TEST(expected_sigfpe_is_passed, .next = &unexpected_sigabrt_is_failed) {
-			return run(g_file, &g_caught, &g_env, catch, &expected_sigfpe).res == TR_PASSED;
-		}
+		TR_TEST(expected_sigfpe_is_passed, .next = &unexpected_sigabrt_is_failed) { return is_passed(&expected_sigfpe); }
 
-		TR_TEST(unexpected_sigfpe_is_failed, .next = &expected_sigfpe_is_passed) {
-			return run(g_file, &g_caught, &g_env, catch, &unexpected_sigfpe).res == TR_FAILED;
-		}
+		TR_TEST(unexpected_sigfpe_is_failed, .next = &expected_sigfpe_is_passed) { return is_failed(&unexpected_sigfpe); }
 
-		TR_TEST(expected_sigill_is_passed, .next = &unexpected_sigfpe_is_failed) {
-			return run(g_file, &g_caught, &g_env, catch, &expected_sigill).res == TR_PASSED;
-		}
+		TR_TEST(expected_sigill_is_passed, .next = &unexpected_sigfpe_is_failed) { return is_passed(&expected_sigill); }
 
-		TR_TEST(unexpected_sigill_is_failed, .next = &expected_sigill_is_passed) {
-			return run(g_file, &g_caught, &g_env, catch, &unexpected_sigill).res == TR_FAILED;
-		}
+		TR_TEST(unexpected_sigill_is_failed, .next = &expected_sigill_is_passed) { return is_failed(&unexpected_sigill); }
 
-		TR_TEST(expected_sigint_is_passed, .next = &unexpected_sigill_is_failed) {
-			return run(g_file, &g_caught, &g_env, catch, &expected_sigint).res == TR_PASSED;
-		}
+		TR_TEST(expected_sigint_is_passed, .next = &unexpected_sigill_is_failed) { return is_passed(&expected_sigint); }
 
-		TR_TEST(unexpected_sigint_is_failed, .next = &expected_sigint_is_passed) {
-			return run(g_file, &g_caught, &g_env, catch, &unexpected_sigint).res == TR_FAILED;
-		}
+		TR_TEST(unexpected_sigint_is_failed, .next = &expected_sigint_is_passed) { return is_failed(&unexpected_sigint); }
 
-		TR_TEST(expected_sigsegv_is_passed, .next = &unexpected_sigint_is_failed) {
-			return run(g_file, &g_caught, &g_env, catch, &expected_sigsegv).res == TR_PASSED;
-		}
+		TR_TEST(expected_sigsegv_is_passed, .next = &unexpected_sigint_is_failed) { return is_passed(&expected_sigsegv); }
 
-		TR_TEST(unexpected_sigsegv_is_failed, .next = &expected_sigsegv_is_passed) {
-			return run(g_file, &g_caught, &g_env, catch, &unexpected_sigsegv).res == TR_FAILED;
-		}
+		TR_TEST(unexpected_sigsegv_is_failed, .next = &expected_sigsegv_is_passed) { return is_failed(&unexpected_sigsegv); }
 
-		TR_TEST(expected_sigterm_is_passed, .next = &unexpected_sigsegv_is_failed) {
-			return run(g_file, &g_caught, &g_env, catch, &expected_sigterm).res == TR_PASSED;
-		}
+		TR_TEST(expected_sigterm_is_passed, .next = &unexpected_sigsegv_is_failed) { return is_passed(&expected_sigterm); }
 
-		TR_TEST(unexpected_sigterm_is_failed, .next = &expected_sigterm_is_passed) {
-			return run(g_file, &g_caught, &g_env, catch, &unexpected_sigterm).res == TR_FAILED;
-		}
+		TR_TEST(unexpected_sigterm_is_failed, .next = &expected_sigterm_is_passed) { return is_failed(&unexpected_sigterm); }
 
 	TR_HEAD(signals, .story = "check signal handling", .body = &unexpected_sigterm_is_failed, .next = &list)
 
-TR_MAIN_HEAD(.story = "check testrail", .body = &signals, .setup = setup, .cleanup = cleanup)
+TR_MAIN_HEAD(.story = "check testrail", .body = &signals, .setup = my_setup, .cleanup = my_cleanup)
