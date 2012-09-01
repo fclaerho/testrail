@@ -1,6 +1,6 @@
 .PHONY: cleanup all
 
-HOME := ./ # may be overriden, e.g. make -f testrail.gmake HOME=some/path/to/testrail
+HOME := ./ # may be overriden for integration, e.g. make -f testrail.gmake HOME=some/path/to/testrail
 TESTS := $(patsubst %.c, %, $(wildcard test/*))
 VPATH := $(HOME):test
 CFLAGS := -std=c99 -Wall -Werror -I$(HOME) # NOTE: -O3 fails tests
@@ -16,7 +16,7 @@ selftest.o: selftest.c testrail-test.h
 
 %.o: %.c testrail.h
 
-test/%: %.o testrail.o
+test/%: test/%.o testrail.o $(OBJ)
 	$(CC) $^ -o $@
 	./$@
 
