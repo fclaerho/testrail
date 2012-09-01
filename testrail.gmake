@@ -3,7 +3,7 @@
 INC := .
 override CFLAGS += -std=c99 -Wall -Werror $(patsubst %,-I%,$(subst :, ,$(INC))) # NOTE: -O3 fails tests
 
-all: $(patsubst %.c, %, $(wildcard test/*))
+all: $(patsubst %.c, %, $(wildcard test/*.c))
 	rm -f $^
 	@echo testrail done.
 
