@@ -90,15 +90,43 @@ TR_TEST(unexpected_sigterm) { raise(SIGTERM); return 0; }
 
 unsigned marker;
 
-void* setup_marker(void) { marker = 0xBEEF; return (void*)&marker; }
+void* setup_marker(void) {
+	marker = 0xBEEF;
+	return (void*)&marker;
+}
 
-void cleanup_marker(void *p) { *(unsigned*)p = 0xDEAD; }
+void* cleanup_marker(void *p) {
+	*(unsigned*)p = 0xDEAD;
+	return 0;
+}
 
-TR_TEST(setup_works, .setup = setup_marker, .cleanup = cleanup_marker) { return data? *(unsigned*)data == 0xBEEF: 0; }
+TR_TEST(setup_works, .setup = setup_marker, .recycle = cleanup_marker) { return data? *(unsigned*)data == 0xBEEF: 0; }
 
 	TR_TEST(body_has_data) { return data? *(unsigned*)data == 0xBEEF: 0; }
 
-TR_HEAD(setup_data_propagates_to_body, .setup = setup_marker, .cleanup = cleanup_marker, .body = &body_has_data)
+TR_HEAD(setup_data_propagates_to_body, .setup = setup_marker, .recycle = cleanup_marker, .body = &body_has_data)
+
+void* reset_index(void) {
+	marker = 0;
+	return (void*)&marker;
+}
+
+void* increment_index(void *p) {
+	if(p) {
+		*(unsigned*)p += 1;
+		if(*(unsigned*)p == 10) return 0;
+	}
+	return p;
+}
+
+	TR_TEST(data_is_incremented) {
+		static unsigned expected = 0;
+		_Bool b = data? expected == *(unsigned*)data: 0;
+		expected += 1;
+		return b;
+	}
+
+TR_HEAD(recycle_data, .setup = reset_index, .recycle = increment_index, .body = &data_is_incremented) /* [0..9] */
 
 /* Sandbox environment.
  */
@@ -112,9 +140,10 @@ void* my_setup(void) {
 	return 0;
 }
 
-void my_cleanup(__attribute__(( unused )) void *p) {
+void* my_cleanup(__attribute__(( unused )) void *p) {
 	(void)fclose(my_file);
 	my_file = 0;
+	return 0;
 }
 
 static void my_catch(int sig) {
@@ -130,6 +159,16 @@ static _Bool is_failed(struct tr_test *t) { return run(my_file, &my_caught, &my_
 
 /* Testrail tests.
  */
+
+		TR_TEST(recycle_terminates) {
+			marker = 0;
+			(void)is_passed(&recycle_data); /* now assumed ok */
+			return marker == 10;
+		}
+
+		TR_TEST(recycle_data_is_passed, .next = &recycle_terminates) { return is_passed(&recycle_data); }
+
+	TR_HEAD(iteration, .story = "check iterative setup() and recycle()", .body = &recycle_data_is_passed)
 
 		TR_TEST(setup_data_propagates_to_body_is_passed) {
 			marker = 0xAAAA;
@@ -147,7 +186,7 @@ static _Bool is_failed(struct tr_test *t) { return run(my_file, &my_caught, &my_
 			return is_passed(&setup_works);
 		}
 
-	TR_HEAD(setup_cleanup, .story = "check setup() and cleanup()", .body = &setup_works_is_passed)
+	TR_HEAD(setup_cleanup, .story = "check non-iterative setup() and recycle()", .body = &setup_works_is_passed, .next = &iteration)
 
 		TR_TEST(failed_test_is_failed) { return is_failed(&failed_test); }
 
@@ -175,7 +214,7 @@ static _Bool is_failed(struct tr_test *t) { return run(my_file, &my_caught, &my_
 
 		TR_TEST(ignored_and_ignored_is_ignored, .next = &ignored_and_passed_is_passed) { return is_ignored(&ignored_and_ignored); }
 
-	TR_HEAD(list, .story = "check aggregation of results", .body = &ignored_and_ignored_is_ignored, .next = &basics)
+	TR_HEAD(aggreg, .story = "check aggregation of results", .body = &ignored_and_ignored_is_ignored, .next = &basics)
 
 		TR_TEST(expected_sigabrt_is_passed) { return is_passed(&expected_sigabrt); }
 
@@ -201,6 +240,6 @@ static _Bool is_failed(struct tr_test *t) { return run(my_file, &my_caught, &my_
 
 		TR_TEST(unexpected_sigterm_is_failed, .next = &expected_sigterm_is_passed) { return is_failed(&unexpected_sigterm); }
 
-	TR_HEAD(signals, .story = "check signal handling", .body = &unexpected_sigterm_is_failed, .next = &list)
+	TR_HEAD(signals, .story = "check signal handling", .body = &unexpected_sigterm_is_failed, .next = &aggreg)
 
-TR_MAIN_HEAD(.story = "check testrail", .body = &signals, .setup = my_setup, .cleanup = my_cleanup)
+TR_MAIN_HEAD(.story = "check testrail", .body = &signals, .setup = my_setup, .recycle = my_cleanup)

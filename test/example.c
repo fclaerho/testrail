@@ -7,15 +7,18 @@
 
 	TR_TEST(math_still_work) { return 2 + 2 == 4; }
 
-	void* mysetup(void) { return calloc(1, 50); }
+	void* alloc_str(void) { return calloc(1, 50); }
 
-	void mycleanup(void *p) { free(p); }
+	void* free_str(void *p) {
+		free(p);
+		return 0;
+	}
 
-	TR_TEST(strcat_makes_sense, .next = &math_still_work, .setup = mysetup, .cleanup = mycleanup) {
-		char *s = data;
-		strcpy(s, "Hello, ");
-		strcat(s, "World!");
-		return strcmp(s, "Hello, World!") == 0;
+	TR_TEST(strcat_makes_sense, .next = &math_still_work, .setup = alloc_str, .recycle = free_str) {
+		char *str = data;
+		strcpy(str, "Hello, ");
+		strcat(str, "World!");
+		return strcmp(str, "Hello, World!") == 0;
 	}
 
 	TR_TEST(segfault, .next = &strcat_makes_sense, .expected = TR_SEGV) { int *ptr = 0; *ptr = 42; return 0; }

@@ -54,6 +54,7 @@ static struct {
 };
 
 static enum tr_ex g_caught;
+
 static jmp_buf g_env;
 
 enum tr_ex sigtoex(int sig) { for(enum tr_ex i = TR_NONE + 1; ; ++i) if(g_exdesc[i].sig == sig) return i; }
@@ -66,9 +67,9 @@ static void catch(int sig) {
 static _Bool trapsig(void(*)(int)) __attribute__(( nonnull(1) ));
 
 static _Bool trapsig(void(*handler)(int)) {
-	_Bool b = 1;
-	for(enum tr_ex i = TR_NONE + 1; i < sizeof(g_exdesc) / sizeof(*g_exdesc) && (b &= signal(g_exdesc[i].sig, handler) != SIG_ERR); ++i);
-	return b;
+	for(enum tr_ex i = TR_NONE + 1; i < sizeof(g_exdesc) / sizeof(*g_exdesc); ++i)
+		if(signal(g_exdesc[i].sig, handler) == SIG_ERR) return 0;
+	return 1;
 }
 
 /* Tests handling.
@@ -80,7 +81,7 @@ static const char* strres(enum tr_res r) {
 		case TR_IGNORED: return "ignored";
 		case TR_PASSED: return "passed";
 		case TR_FAILED: return "*FAILED*";
-		default: return "result?";
+		default: return "illegal result";
 	}
 }
 
@@ -124,8 +125,10 @@ static enum tr_res runtest(struct tr_ctx *ctx, struct tr_test *t, tr_depth d, en
 			trace(ctx->file, "%scannot trap signals", prefix(d + 1, 0));
 			r = TR_FAILED;
 		}
-		if(t->body && !stop(m, r)) r = max(r, runlist(ctx, t->body, d + 1, m, data));
-		if(t->cleanup) t->cleanup(data);
+		while(!stop(m, r)) {
+			if(t->body) r = max(r, runlist(ctx, t->body, d + 1, m, data));
+			if(!t->recycle || (t->recycle && !(data = t->recycle(data)))) break;
+		}
 	}
 	trace(ctx->file, "%stest %s in %fs", prefix(d, 0), strres(r), elapsed(t0));
 	ctx->cnt[r] += 1;

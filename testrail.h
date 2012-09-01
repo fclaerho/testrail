@@ -36,9 +36,9 @@ enum tr_ex {
 };
 
 struct tr_test {
+	void* (*recycle)(void*); /* if recycle returns a non-null value, body is re-evaluated */
 	_Bool (*assert)(void*);
-	void (*cleanup)(void*);
-	void* (*setup)(void);
+	void* (*setup)(void); /* setup user context */
 	struct tr_test *body;
 	struct tr_test *next;
 	enum tr_ex expected;

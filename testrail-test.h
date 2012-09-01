@@ -1,4 +1,4 @@
-/* Testrail internal interfaces for self-testing.
+/* Testrail internal interface for meta-testing (see selftest).
  */
 
 #ifndef TESTRAIL_TEST
