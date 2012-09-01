@@ -1,24 +1,12 @@
-.PHONY: cleanup all
+.PHONY: all
 
-HOME := ./ # may be overriden for integration, e.g. make -f testrail.gmake HOME=some/path/to/testrail
-TESTS := $(patsubst %.c, %, $(wildcard test/*))
-VPATH := $(HOME):test
-CFLAGS := -std=c99 -Wall -Werror -I$(HOME) # NOTE: -O3 fails tests
+INC := .
+override CFLAGS += -std=c99 -Wall -Werror $(patsubst %,-I%,$(subst :, ,$(INC))) # NOTE: -O3 fails tests
 
-all: $(TESTS)
-
-testrail-test.h: testrail.h
-	touch -c $@
-
-testrail.o: testrail.c testrail-test.h
-
-selftest.o: selftest.c testrail-test.h
-
-%.o: %.c testrail.h
+all: $(patsubst %.c, %, $(wildcard test/*))
+	rm -f $^
+	@echo testrail done.
 
 test/%: test/%.o testrail.o $(OBJ)
 	$(CC) $^ -o $@
 	./$@
-
-cleanup:
-	rm -f *.o $(TESTS)
