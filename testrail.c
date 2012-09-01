@@ -90,9 +90,9 @@ static _Bool stop(enum tr_mode m, enum tr_res r) { return m == TR_STOP_ON_FAILUR
 
 typedef size_t tr_depth;
 
-static enum tr_res runlist(struct tr_ctx*, struct tr_test*, tr_depth, enum tr_mode) __attribute__(( nonnull(1, 2) ));
+static enum tr_res runlist(struct tr_ctx*, struct tr_test*, tr_depth, enum tr_mode, void*) __attribute__(( nonnull(1, 2) ));
 
-static enum tr_res runtest(struct tr_ctx*, struct tr_test*, tr_depth, enum tr_mode) __attribute__(( nonnull(1, 2) ));
+static enum tr_res runtest(struct tr_ctx*, struct tr_test*, tr_depth, enum tr_mode, void*) __attribute__(( nonnull(1, 2) ));
 
 static const char* prefix(tr_depth d, _Bool new) {
 	static char s[32];
@@ -103,7 +103,7 @@ static const char* prefix(tr_depth d, _Bool new) {
 
 double elapsed(clock_t t0) { return ((double)clock() - t0) / CLOCKS_PER_SEC; }
 
-static enum tr_res runtest(struct tr_ctx *ctx, struct tr_test *t, tr_depth d, enum tr_mode m) {
+static enum tr_res runtest(struct tr_ctx *ctx, struct tr_test *t, tr_depth d, enum tr_mode m, void *data) {
 	if(t->mode != TR_INHERITED) m = t->mode;
 	enum tr_res r = TR_UNKNOWN;
 	trace(ctx->file, "%s%s", prefix(d, 1), t->story);
@@ -111,7 +111,6 @@ static enum tr_res runtest(struct tr_ctx *ctx, struct tr_test *t, tr_depth d, en
 	if(t->ignored) {
 		r = TR_IGNORED;
 	} else {
-		void *data = 0;
 		if(t->setup) data = t->setup();
 		if(trapsig(ctx->handler)) {
 			if(!setjmp(*(ctx->env))) {
@@ -125,7 +124,7 @@ static enum tr_res runtest(struct tr_ctx *ctx, struct tr_test *t, tr_depth d, en
 			trace(ctx->file, "%scannot trap signals", prefix(d + 1, 0));
 			r = TR_FAILED;
 		}
-		if(t->body && !stop(m, r)) r = max(r, runlist(ctx, t->body, d + 1, m));
+		if(t->body && !stop(m, r)) r = max(r, runlist(ctx, t->body, d + 1, m, data));
 		if(t->cleanup) t->cleanup(data);
 	}
 	trace(ctx->file, "%stest %s in %fs", prefix(d, 0), strres(r), elapsed(t0));
@@ -134,9 +133,9 @@ static enum tr_res runtest(struct tr_ctx *ctx, struct tr_test *t, tr_depth d, en
 	return r;
 }
 
-static enum tr_res runlist(struct tr_ctx *ctx, struct tr_test *head, tr_depth d, enum tr_mode m) {
+static enum tr_res runlist(struct tr_ctx *ctx, struct tr_test *head, tr_depth d, enum tr_mode m, void *data) {
 	enum tr_res r = TR_UNKNOWN;
-	for(struct tr_test *t = head; t && !stop(m, r); t = t->next) r = max(r, runtest(ctx, t, d, m));
+	for(struct tr_test *t = head; t && !stop(m, r); t = t->next) r = max(r, runtest(ctx, t, d, m, data));
 	return r;
 }
 
@@ -148,7 +147,7 @@ struct tr_ctx run(FILE *file, enum tr_ex *caught, jmp_buf *env, void (*handler)(
 		.file = file,
 		.env = env,
 	};
-	ctx.res = runlist(&ctx, head, 0, TR_RESUME_ON_FAILURE);
+	ctx.res = runlist(&ctx, head, 0, TR_RESUME_ON_FAILURE, 0);
 	trace(file, "summary: %fs, %u node%s, %u unknown, %u ignored, %u passed, %u failed, %s.",
 		elapsed(t0),
 		ctx.sum,
