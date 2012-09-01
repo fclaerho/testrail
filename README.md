@@ -4,7 +4,13 @@ TestRail is a unit test framework designed for ANSI C99 compliant programs only.
 Platform-specific features are NOT supported (multi-threading in particular).
 This framework is compatible with **Linux** and **OSX** platforms, Windows support is planned soon.
 
-TODO:
-* documentation (under work)
+### USAGE
+* In your project directory, add testrail as a git submodule[^1]: **git submodule add https://github.com/claerhout/testrail**
+* (under work)
+
+### TODO
 * testrail-test header comments
 * makefile for submodule integration?
+
+### REFERENCES
+[^1] [git submodules](http://git-scm.com/book/en/Git-Tools-Submodules)
