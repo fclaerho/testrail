@@ -9,11 +9,11 @@ Suggestions are welcomed!
 
 1. In your project directory,
    if you use git as VCS, add testrail as a git submodule:
-   **$ git submodule add https://github.com/claerhout/testrail**.
+   **$ git submodule add https://github.com/claerhout/testrail.git**.
    Remind your users to initialize this module after pulling your project:
    **$ git submodule init** and **$ git submodule update**.
    If you use another VCS, simply pull testrail:
-   **$ git pull https://github.com/claerhout/testrail**
+   **$ git pull https://github.com/claerhout/testrail.git**
 2. Check testrail is working: **$ make -C testrail -f testrail.gmake**,
    the second to last line should say "testrail done".
 3. Create a **test/** directory and place your tests in there.
