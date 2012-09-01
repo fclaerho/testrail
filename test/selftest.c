@@ -88,6 +88,18 @@ TR_TEST(expected_sigterm, .expected = TR_TERM) { raise(SIGTERM); return 0; }
 
 TR_TEST(unexpected_sigterm) { raise(SIGTERM); return 0; }
 
+unsigned marker;
+
+void* setup_marker(void) { marker = 0xBEEF; return (void*)&marker; }
+
+void cleanup_marker(void *p) { *(unsigned*)p = 0xDEAD; }
+
+TR_TEST(setup_works, .setup = setup_marker, .cleanup = cleanup_marker) { return data? *(unsigned*)data == 0xBEEF: 0; }
+
+	TR_TEST(body_has_data) { return data? *(unsigned*)data == 0xBEEF: 0; }
+
+TR_HEAD(setup_data_propagates_to_body, .setup = setup_marker, .cleanup = cleanup_marker, .body = &body_has_data)
+
 /* Sandbox environment.
  */
 
@@ -119,13 +131,31 @@ static _Bool is_failed(struct tr_test *t) { return run(my_file, &my_caught, &my_
 /* Testrail tests.
  */
 
+		TR_TEST(setup_data_propagates_to_body_is_passed) {
+			marker = 0xAAAA;
+			return is_passed(&setup_data_propagates_to_body); /* assumes aggregation of results works */
+		}
+
+		TR_TEST(cleanup_works, .next = &setup_data_propagates_to_body_is_passed) {
+			marker = 0xAAAA;
+			(void)is_passed(&setup_works); /* now assumed ok */
+			return marker == 0xDEAD;
+		}
+
+		TR_TEST(setup_works_is_passed, .next = &cleanup_works) {
+			marker = 0xAAAA;
+			return is_passed(&setup_works);
+		}
+
+	TR_HEAD(setup_cleanup, .story = "check setup() and cleanup()", .body = &setup_works_is_passed)
+
 		TR_TEST(failed_test_is_failed) { return is_failed(&failed_test); }
 
 		TR_TEST(passed_test_is_passed, .next = &failed_test_is_failed) { return is_passed(&passed_test); }
 
 		TR_TEST(ignored_test_is_ignored, .next = &passed_test_is_passed) { return is_ignored(&ignored_test); }
 
-	TR_HEAD(basics, .story = "check basic status", .body = &ignored_test_is_ignored)
+	TR_HEAD(basics, .story = "check basic status", .body = &ignored_test_is_ignored, .next = &setup_cleanup)
 
 		TR_TEST(failed_and_failed_is_failed) { return is_failed(&failed_and_failed); }
 
