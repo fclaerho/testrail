@@ -19,15 +19,15 @@ Suggestions are welcomed!
 3. Create a **test/** directory and place your tests in there.
    Read **testrail.h** for an [introduction to testrail](https://github.com/claerhout/testrail/blob/master/testrail.h) concepts.
    Read **test/example.h** for some [sample code](https://github.com/claerhout/testrail/blob/master/test/example.c).
-4. Add a test rule to your project makefile.
+4. Add a rule for testing to your project makefile.
    The prerequisites of that rule are the objects needed to link your tests.
    Those objects are then passed on to the testrail makefile via the OBJ variable.
-   Include paths are specified by the INC variable, where entries are separated by a colon.
+   Search paths (sources and headers) are specified by the VPATH variable, where entries are separated by a colon.
    e.g.:
 
 		...
-		test: foo.o; $(MAKE) -f testrail/testrail.gmake INC=.:testrail OBJ=$^
-5. Use **$ make test** to run your tests.
+		test: foo.o; $(MAKE) -f testrail/testrail.gmake VPATH=.:testrail OBJ=$^
+5. Use **$ make test** to run your tests (if you named the rule as "test").
    If they all pass, all intermediary objects and binaries are cleaned up.
 
 -------------------------------------------------------------------------------
