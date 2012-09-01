@@ -10,7 +10,7 @@ Suggestions are welcomed!
 1. In your project directory,
    if you use git as VCS, add testrail as a git submodule:
    **$ git submodule add https://github.com/claerhout/testrail**.
-   Remind your users to initialise this module after pulling your project:
+   Remind your users to initialize this module after pulling your project:
    **$ git submodule init** and **$ git submodule update**.
    If you use another VCS, simply pull testrail:
    **$ git pull https://github.com/claerhout/testrail**
