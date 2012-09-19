@@ -1,12 +1,14 @@
 ![logo](https://github.com/claerhout/testrail/raw/master/testrail-logo.png)
 
-TestRail is a unit test framework featuring:
-* Strict ANSI C compliant (C99)
+**TestRail** is a unit test framework featuring:
+* Strict ANSI C compliance (C99)
 * Tests Composition
 * Simple to use
-* Full of awesomeness
+* Full of awesomeness (wat?)
 
 -------------------------------------------------------------------------------
+
+# HOW-TO
 
 **There's no windows installation procedure so far, coming soon**
 
