@@ -1,6 +1,6 @@
 ![logo](https://github.com/claerhout/testrail/raw/master/testrail-logo.png)
 
-**☆ TestRail ☆** is a unit test framework for your C programs, featuring:
+**TestRail** is a unit test framework for your C programs, featuring:
 * Strict ANSI C compliance (C99) ✔
 * Tests Composition Support ✔
 * Simple to use ✔
