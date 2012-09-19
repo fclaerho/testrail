@@ -1,16 +1,16 @@
 ![logo](https://github.com/claerhout/testrail/raw/master/testrail-logo.png)
 
-**TestRail** is a unit test framework featuring:
-* Strict ANSI C compliance (C99)
-* Tests Composition
-* Simple to use
-* Full of awesomeness (wat?)
+**☆ TestRail ☆** is a unit test framework for your C programs, featuring:
+* Strict ANSI C compliance (C99) ✔
+* Tests Composition Support ✔
+* Simple to use ✔
+* Full of awesomeness (wat?) ✔
 
 -------------------------------------------------------------------------------
 
 # HOW-TO
 
-**There's no windows installation procedure so far, coming soon**
+**NOTE: There's no windows installation procedure so far, coming soon...**
 
 1. In your project directory,
    if you use git as VCS, add testrail as a git submodule:
