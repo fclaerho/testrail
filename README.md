@@ -1,6 +1,6 @@
 ![logo](https://github.com/claerhout/testrail/raw/master/testrail-logo.png)
 
-**TestRail** is a unit test framework for your C programs, featuring:
+**TestRail** is a C unit test framework, featuring:
 * Strict ANSI C compliance (C99) ✔
 * Tests Composition Support ✔
 * Simple to use ✔
@@ -18,7 +18,7 @@
    Remind your users to initialize this module after pulling your project:
    `$ git submodule init` and `$ git submodule update`.
    If you use another VCS, simply pull testrail:
-   '$ git pull https://github.com/claerhout/testrail.git'.
+   `$ git pull https://github.com/claerhout/testrail.git`.
 2. Check testrail is working: `$ make -C testrail -f testrail.gmake`,
    the second to last line should say "testrail done".
 3. Create a `test/` directory and place your tests in there.
