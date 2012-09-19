@@ -39,4 +39,4 @@
 -------------------------------------------------------------------------------
 
 [![Build Status](https://secure.travis-ci.org/claerhout/testrail.png?branch=master)](http://travis-ci.org/claerhout/testrail)
-TestRail is tested by itself :)
+CI environment powered by Travis - TestRail is tested by itself :)
