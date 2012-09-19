@@ -1,11 +1,14 @@
 ![logo](https://github.com/claerhout/testrail/raw/master/testrail-logo.png)
 
-TestRail is a unit test framework designed for ANSI C99 compliant programs only.
-Platform-specific features are NOT supported (multi-threading in particular).
-TestRail is compatible with **Linux** and **OSX**, Windows is planned soon.
-Suggestions are welcomed!
+TestRail is a unit test framework featuring:
+* Strict ANSI C compliant (C99)
+* Tests Composition
+* Simple to use
+* Full of awesomeness
 
 -------------------------------------------------------------------------------
+
+**There's no windows installation procedure so far, coming soon**
 
 1. In your project directory,
    if you use git as VCS, add testrail as a git submodule:
@@ -27,6 +30,7 @@ Suggestions are welcomed!
 
 		...
 		test: foo.o; $(MAKE) -f testrail/testrail.gmake VPATH=.:testrail OBJ=$^
+
 5. Use **$ make test** to run your tests (if you named the rule as "test").
    If they all pass, all intermediary objects and binaries are cleaned up.
 
