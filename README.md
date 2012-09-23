@@ -1,10 +1,11 @@
 ![logo](https://github.com/claerhout/testrail/raw/master/testrail-logo.png)
 
-**TestRail** is a C unit test framework, featuring:
-* Strict ANSI C compliance (C99) ✔
-* Tests Composition Support ✔
-* User-friendly ✔
-* Full of awesomeness (wat?) ✔
+**TestRail** is a C unit test framework:
+* Strictly ANSI C compliant (C99) ✔
+* Supporting tests composition ✔
+* Simple ✔
+* Small ✔
+* As pictured above, full of awesomeness (wat?) ✔
 
 -------------------------------------------------------------------------------
 
@@ -34,6 +35,7 @@
 
 		...
 		test: foo.o; $(MAKE) -f testrail/testrail.gmake VPATH=.:testrail OBJ="$^"
+		...
 
 5. Use `$ make test` to run your tests (if you named the rule as "test").
    If they all pass, all intermediary objects and binaries are cleaned up.
