@@ -3,8 +3,7 @@
 **TestRail** is a C unit test framework:
 * Strictly ANSI C compliant (C99) ✔
 * Supporting tests composition ✔
-* Simple ✔
-* Small ✔
+* Small & simple ✔
 * As pictured above, full of awesomeness (wat?) ✔
 
 -------------------------------------------------------------------------------
