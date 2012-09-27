@@ -4,19 +4,19 @@
 /* Sandboxed tests.
  */
 
-TR_TEST(failed_test) { return 0; }
+TR_TEST(failed_test, .next = 0) { return 0; }
 
-TR_TEST(passed_test) { return 1; }
+TR_TEST(passed_test, .next = 0) { return 1; }
 
 TR_TEST(ignored_test, .ignored = 1) { return 0; }
 
-	TR_TEST(failed_test2) { return 0; }
+	TR_TEST(failed_test2, .next = 0) { return 0; }
 
 	TR_TEST(failed_test3, .next = &failed_test2) { return 0; }
 
 TR_HEAD(failed_and_failed, .body = &failed_test3)
 
-	TR_TEST(passed_test2) { return 1; }
+	TR_TEST(passed_test2, .next = 0) { return 1; }
 
 	TR_TEST(failed_test4, .next = &passed_test2) { return 0; }
 
@@ -28,13 +28,13 @@ TR_HEAD(failed_and_passed, .body = &failed_test4)
 
 TR_HEAD(failed_and_ignored, .body = &failed_test5)
 
-	TR_TEST(failed_test6) { return 0; }
+	TR_TEST(failed_test6, .next = 0) { return 0; }
 
 	TR_TEST(passed_test3, .next = &failed_test6) { return 1; }
 
 TR_HEAD(passed_and_failed, .body = &passed_test3)
 
-	TR_TEST(passed_test4) { return 1; }
+	TR_TEST(passed_test4, .next = 0) { return 1; }
 
 	TR_TEST(passed_test5, .next = &passed_test4) { return 1; }
 
@@ -46,13 +46,13 @@ TR_HEAD(passed_and_passed, .body = &passed_test5)
 
 TR_HEAD(passed_and_ignored, .body = &passed_test6)
 
-	TR_TEST(failed_test7) { return 0; }
+	TR_TEST(failed_test7, .next = 0) { return 0; }
 
 	TR_TEST(ignored_test4, .ignored = 1, .next = &failed_test7) { return 0; }
 
 TR_HEAD(ignored_and_failed, .body = &ignored_test4)
 
-	TR_TEST(passed_test7) { return 1; }
+	TR_TEST(passed_test7, .next = 0) { return 1; }
 
 	TR_TEST(ignored_test5, .ignored = 1, .next = &passed_test7) { return 0; }
 
@@ -66,27 +66,27 @@ TR_HEAD(ignored_and_ignored, .body = &ignored_test7)
 
 TR_TEST(expected_sigabrt, .expected = TR_ABRT) { raise(SIGABRT); return 0; }
 
-TR_TEST(unexpected_sigabrt) { raise(SIGABRT); return 0; }
+TR_TEST(unexpected_sigabrt, .next = 0) { raise(SIGABRT); return 0; }
 
 TR_TEST(expected_sigfpe, .expected = TR_FPE) { raise(SIGFPE); return 0; }
 
-TR_TEST(unexpected_sigfpe) { raise(SIGFPE); return 0; }
+TR_TEST(unexpected_sigfpe, .next = 0) { raise(SIGFPE); return 0; }
 
 TR_TEST(expected_sigill, .expected = TR_ILL) { raise(SIGILL); return 0; }
 
-TR_TEST(unexpected_sigill) { raise(SIGILL); return 0; }
+TR_TEST(unexpected_sigill, .next = 0) { raise(SIGILL); return 0; }
 
 TR_TEST(expected_sigint, .expected = TR_INT) { raise(SIGINT); return 0; }
 
-TR_TEST(unexpected_sigint) { raise(SIGINT); return 0; }
+TR_TEST(unexpected_sigint, .next = 0) { raise(SIGINT); return 0; }
 
 TR_TEST(expected_sigsegv, .expected = TR_SEGV) { raise(SIGSEGV); return 0; }
 
-TR_TEST(unexpected_sigsegv) { raise(SIGSEGV); return 0; }
+TR_TEST(unexpected_sigsegv, .next = 0) { raise(SIGSEGV); return 0; }
 
 TR_TEST(expected_sigterm, .expected = TR_TERM) { raise(SIGTERM); return 0; }
 
-TR_TEST(unexpected_sigterm) { raise(SIGTERM); return 0; }
+TR_TEST(unexpected_sigterm, .next = 0) { raise(SIGTERM); return 0; }
 
 unsigned marker;
 
@@ -102,7 +102,7 @@ void* cleanup_marker(void *p) {
 
 TR_TEST(setup_works, .setup = setup_marker, .recycle = cleanup_marker) { return data? *(unsigned*)data == 0xBEEF: 0; }
 
-	TR_TEST(body_has_data) { return data? *(unsigned*)data == 0xBEEF: 0; }
+	TR_TEST(body_has_data, .next = 0) { return data? *(unsigned*)data == 0xBEEF: 0; }
 
 TR_HEAD(setup_data_propagates_to_body, .setup = setup_marker, .recycle = cleanup_marker, .body = &body_has_data)
 
@@ -119,7 +119,7 @@ void* increment_index(void *p) {
 	return p;
 }
 
-	TR_TEST(data_is_incremented) {
+	TR_TEST(data_is_incremented, .next = 0) {
 		static unsigned expected = 0;
 		_Bool b = data? expected == *(unsigned*)data: 0;
 		expected += 1;
@@ -160,7 +160,7 @@ static _Bool is_failed(struct tr_test *t) { return run(my_file, &my_caught, &my_
 /* Testrail tests.
  */
 
-		TR_TEST(recycle_terminates) {
+		TR_TEST(recycle_terminates, .next = 0) {
 			marker = 0;
 			(void)is_passed(&recycle_data); /* now assumed ok */
 			return marker == 10;
@@ -170,7 +170,7 @@ static _Bool is_failed(struct tr_test *t) { return run(my_file, &my_caught, &my_
 
 	TR_HEAD(iteration, .story = "check iterative setup() and recycle()", .body = &recycle_data_is_passed)
 
-		TR_TEST(setup_data_propagates_to_body_is_passed) {
+		TR_TEST(setup_data_propagates_to_body_is_passed, .next = 0) {
 			marker = 0xAAAA;
 			return is_passed(&setup_data_propagates_to_body); /* assumes aggregation of results works */
 		}
@@ -188,7 +188,7 @@ static _Bool is_failed(struct tr_test *t) { return run(my_file, &my_caught, &my_
 
 	TR_HEAD(setup_cleanup, .story = "check non-iterative setup() and recycle()", .body = &setup_works_is_passed, .next = &iteration)
 
-		TR_TEST(failed_test_is_failed) { return is_failed(&failed_test); }
+		TR_TEST(failed_test_is_failed, .next = 0) { return is_failed(&failed_test); }
 
 		TR_TEST(passed_test_is_passed, .next = &failed_test_is_failed) { return is_passed(&passed_test); }
 
@@ -196,7 +196,7 @@ static _Bool is_failed(struct tr_test *t) { return run(my_file, &my_caught, &my_
 
 	TR_HEAD(basics, .story = "check basic status", .body = &ignored_test_is_ignored, .next = &setup_cleanup)
 
-		TR_TEST(failed_and_failed_is_failed) { return is_failed(&failed_and_failed); }
+		TR_TEST(failed_and_failed_is_failed, .next = 0) { return is_failed(&failed_and_failed); }
 
 		TR_TEST(failed_and_passed_is_failed, .next = &failed_and_failed_is_failed) { return is_failed(&failed_and_passed); }
 
@@ -216,7 +216,7 @@ static _Bool is_failed(struct tr_test *t) { return run(my_file, &my_caught, &my_
 
 	TR_HEAD(aggreg, .story = "check aggregation of results", .body = &ignored_and_ignored_is_ignored, .next = &basics)
 
-		TR_TEST(expected_sigabrt_is_passed) { return is_passed(&expected_sigabrt); }
+		TR_TEST(expected_sigabrt_is_passed, .next = 0) { return is_passed(&expected_sigabrt); }
 
 		TR_TEST(unexpected_sigabrt_is_failed, .next = &expected_sigabrt_is_passed) { return is_failed(&unexpected_sigabrt); }
 
