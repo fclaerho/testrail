@@ -13,17 +13,17 @@
 
 static void vtrace(FILE*, const char*, va_list) __attribute__(( nonnull(1, 2), format(printf, 2, 0) ));
 
-static void vtrace(FILE *file, const char *rawfmt, va_list list) {
+static void vtrace(FILE *file, const char *usrfmt, va_list list) {
 	time_t t = time(0);
 	struct tm tm = *localtime(&t);
 	char prefix[20];
 	(void)strftime(prefix, sizeof(prefix), "%d/%m/%Y-%T", &tm);
 	char *sep = ": ";
 	char *suffix = "\n";
-	char fmt[strlen(prefix) + strlen(sep) + strlen(rawfmt) + strlen(suffix) + 1];
+	char fmt[strlen(prefix) + strlen(sep) + strlen(usrfmt) + strlen(suffix) + 1];
 	strcpy(fmt, prefix);
 	strcat(fmt, sep);
-	strcat(fmt, rawfmt);
+	strcat(fmt, usrfmt);
 	strcat(fmt, suffix);
 	vfprintf(file, fmt, list);
 }
