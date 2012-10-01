@@ -1,5 +1,3 @@
-#define _ANSI_SOURCE 1
-
 #include <signal.h>
 #include <string.h>
 #include <stdarg.h>
@@ -16,7 +14,7 @@ static void vtrace(FILE*, const char*, va_list) __attribute__(( nonnull(1, 2), f
 static void vtrace(FILE *file, const char *usrfmt, va_list list) {
 	time_t t = time(0);
 	struct tm tm = *localtime(&t);
-	char prefix[20];
+	char prefix[20]; /* length of the standard expansion of %d/%m/%Y-%T */
 	(void)strftime(prefix, sizeof(prefix), "%d/%m/%Y-%T", &tm);
 	char *sep = ": ";
 	char *suffix = "\n";
