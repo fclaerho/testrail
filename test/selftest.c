@@ -1,4 +1,4 @@
-#include "testrail-test.h"
+#include "testrail-dev.h"
 #include <signal.h>
 
 /* Sandboxed tests.
