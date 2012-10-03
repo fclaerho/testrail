@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "testrail-test.h"
+#include "testrail-dev.h"
 
 /* Traces.
  */
