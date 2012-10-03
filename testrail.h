@@ -2,7 +2,7 @@
  * |_   _|__ __| |_| _ \__ _(_) |
  *   | |/ -_|_-<  _|   / _` | | |
  *   |_|\___/__/\__|_|_\__,_|_|_|
- * Yet another C unit test framework.
+ * Yet another C99 unit test framework.
  * copyright (c) 2012, f.claerhout, licensed under the GPL.
  *
  * A test suite is a list of test nodes (hereafter referred to as "a list").

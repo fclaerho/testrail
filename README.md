@@ -1,7 +1,7 @@
 ![logo](https://github.com/claerhout/testrail/raw/master/testrail-logo.png)
 
 **TestRail** is a C unit test framework:
-* Strictly ANSI C compliant (C99) ✔
+* Strictly ISO C99 compliant ✔
 * Supporting tests composition ✔
 * Small & simple ✔
 * As pictured above, full of awesomeness (wat?) ✔
