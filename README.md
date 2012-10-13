@@ -27,7 +27,7 @@
 4. Add a rule for testing to your project makefile, name it as you wish.
    The prerequisites of that rule are the objects needed to link your tests.
    Those objects are then passed on to the testrail makefile via the `OBJ` variable.
-   Simply passing `OBJ` as follow should always work: `OBJ="$^"`.
+   Simply passing `OBJ` as follow should work most of the time: `OBJ="$^"`.
    Be sure to enclose the `$^` variable between quotes so that multiple entries are interpreted as a single token.
    Search paths (sources and headers) are specified by the `VPATH` variable, where entries are separated by a colon.
    e.g.:
