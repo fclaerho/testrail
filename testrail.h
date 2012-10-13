@@ -13,7 +13,11 @@
  * - the catching of an exception specified by its .expected field,
  * - the result of its body.
  * A node inherits its parent mode, except if specified otherwise.
- * To start your suite, define the head node, tr_g_head.
+ * A node inherites its parent data if .recycle is undefined.
+ * To start your suite:
+ * - define tests with TR_TEST,
+ * - possibly group tests with TR_HEAD,
+ * - define the head node, tr_g_head, using TR_MAIN_HEAD.
  */
 
 #ifndef TESTRAIL
@@ -36,15 +40,15 @@ enum tr_ex {
 };
 
 struct tr_test {
-	void* (*recycle)(void*); /* if recycle returns a non-null value, body is re-evaluated */
-	_Bool (*assert)(void*);
-	void* (*setup)(void); /* setup user context */
+	const char* (*strdata)(void*);
+	void* (*recycle)(void*); /* the node is re-evaluated as long as recycle returns a non-null value */
+	_Bool (*assert)(void*); /* assert takes its input from recycle() if present, or its parent */
 	struct tr_test *body;
 	struct tr_test *next;
 	enum tr_ex expected;
 	const char *story;
 	enum tr_mode mode; /* specify a mode for this node and its body */
-	_Bool ignored; /* if set, specify to ignore this test and its body */
+	_Bool ignored; /* if set, specify to ignore this node and its body */
 };
 
 extern struct tr_test tr_g_head;
@@ -53,7 +57,6 @@ extern struct tr_test tr_g_head;
 	_Bool assert_##symbol(void*);\
 	struct tr_test symbol = {\
 		.assert = assert_##symbol,\
-		.story = #symbol,\
 		__VA_ARGS__\
 	};\
 	_Bool assert_##symbol(__attribute__(( unused )) void *data)

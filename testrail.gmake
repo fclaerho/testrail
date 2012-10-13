@@ -4,9 +4,9 @@ VPATH := .
 override CFLAGS += -pedantic -std=c99 -Wall -Werror $(patsubst %,-I%,$(subst :, ,$(VPATH))) # NOTE: -O3 fails tests
 
 all: $(patsubst %.c, %, $(wildcard test/*.c))
-	rm -f $^
+	rm -f $^ # cleanup tests
 	@echo testrail done.
 
 test/%: test/%.o testrail.o $(OBJ)
-	$(CC) $^ -o $@
-	./$@
+	$(CC) $^ -o $@ # compile test
+	./$@ # run test
