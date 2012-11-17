@@ -13,7 +13,7 @@
  * - the catching of an exception specified by its .expected field,
  * - the result of its body.
  * A node inherits its parent mode, except if specified otherwise.
- * A node inherites its parent data if .recycle is undefined.
+ * A node inherits its parent data if .recycle is undefined.
  * To start your suite:
  * - define tests with TR_TEST,
  * - possibly group tests with TR_HEAD,
