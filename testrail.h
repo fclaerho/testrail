@@ -3,7 +3,7 @@
  *   | |/ -_|_-<  _|   / _` | | |
  *   |_|\___/__/\__|_|_\__,_|_|_|
  * Yet another C99 unit test framework.
- * Copyright (c) 2012, f.claerhout, licensed under the GPL.
+ * Copyright (c) 2012 f.claerhout, licensed under the GPL.
  *
  * A test suite is a list of test nodes (hereafter referred to as "a list").
  * A test node can be itself divided into a list, called its "body".
