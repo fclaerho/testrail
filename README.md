@@ -41,5 +41,5 @@
 
 -------------------------------------------------------------------------------
 
-[![Build Status](https://secure.travis-ci.org/fclaerho/testrail.png?branch=master)](http://travis-ci.org/claerhout/testrail)
+[![Build Status](https://secure.travis-ci.org/fclaerho/testrail.png?branch=master)](http://travis-ci.org/fclaerho/testrail)
 CI environment powered by Travis - TestRail is tested by itself :)
