@@ -6,7 +6,7 @@
 * Small & simple ✔
 * As pictured above, full of awesomeness (wut?) ✔
 
-[![Build Status](https://secure.travis-ci.org/fclaerho/testrail.png?branch=master)](http://travis-ci.org/fclaerho/testrail)
+[![Build Status](https://secure.travis-ci.org/fclaerho/testrail.png?branch=master)](http://travis-ci.org/fclaerho/testrail) -- CI environment powered by Travis -- TestRail is tested by itself :)
 
 -------------------------------------------------------------------------------
 
@@ -41,7 +41,3 @@
 5. Use `$ make test` to run your tests (if you named the rule as "test").
    If they all pass, all intermediary objects and binaries are cleaned up.
 
--------------------------------------------------------------------------------
-
-[![Build Status](https://secure.travis-ci.org/fclaerho/testrail.png?branch=master)](http://travis-ci.org/fclaerho/testrail)
-CI environment powered by Travis - TestRail is tested by itself :)
