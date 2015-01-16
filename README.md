@@ -6,6 +6,8 @@
 * Small & simple ✔
 * As pictured above, full of awesomeness (wut?) ✔
 
+[![Build Status](https://secure.travis-ci.org/fclaerho/testrail.png?branch=master)](http://travis-ci.org/fclaerho/testrail)
+
 -------------------------------------------------------------------------------
 
 # HOW-TO
