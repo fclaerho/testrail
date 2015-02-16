@@ -6,8 +6,6 @@
 * Small & simple ✔
 * As pictured above, full of awesomeness (wut?) ✔
 
-[![Build Status](https://secure.travis-ci.org/fclaerho/testrail.png?branch=master)](http://travis-ci.org/fclaerho/testrail) -- CI environment powered by Travis -- TestRail is tested by itself :)
-
 -------------------------------------------------------------------------------
 
 # HOW-TO
