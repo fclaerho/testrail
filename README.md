@@ -8,9 +8,8 @@
 
 -------------------------------------------------------------------------------
 
-# HOW-TO
-
-**NOTE: There's no windows installation procedure so far, coming soon...**
+HOW-TO
+------
 
 1. In your project directory,
    * if you use git as VCS, add testrail as a git submodule:
